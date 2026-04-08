@@ -375,6 +375,7 @@ export class BookPage {
       default:
         return false;
     }
+    }
 
   /**
    * Setup all event listeners
