@@ -1,0 +1,386 @@
+/* ═══════════════════════════════════════════════════════════════
+   📱 RESPONSIVE - Mobile-first Breakpoints
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Mobile-first approach - base styles are for mobile */
+
+/* ─── Small Screens (640px) ─── */
+@media (min-width: 640px) {
+  h1 {
+    font-size: var(--font-size-4xl);
+  }
+
+  h2 {
+    font-size: var(--font-size-3xl);
+  }
+
+  .grid {
+    grid-template-columns: 2;
+  }
+
+  nav {
+    padding: var(--spacing-lg);
+  }
+
+  .nav-links {
+    gap: var(--spacing-xl);
+  }
+}
+
+/* ─── Medium Screens (768px) ─── */
+@media (min-width: 768px) {
+  h1 {
+    font-size: var(--font-size-5xl);
+  }
+
+  .grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .card {
+    padding: var(--spacing-2xl);
+  }
+
+  .modal {
+    max-width: 600px;
+  }
+
+  .container {
+    max-width: 768px;
+  }
+}
+
+/* ─── Large Screens (1024px) ─── */
+@media (min-width: 1024px) {
+  .grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .modal {
+    max-width: 800px;
+  }
+
+  .container {
+    max-width: 1024px;
+  }
+
+  .hidden-lg {
+    display: none;
+  }
+}
+
+/* ─── Extra Large Screens (1280px) ─── */
+@media (min-width: 1280px) {
+  .grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .container {
+    max-width: 1280px;
+  }
+}
+
+/* ─── 2XL Screens (1536px) ─── */
+@media (min-width: 1536px) {
+  .container {
+    max-width: 1536px;
+  }
+}
+
+/* ─── Tablet / Landscape ─── */
+@media (max-height: 600px) and (min-width: 768px) {
+  h1 {
+    font-size: var(--font-size-3xl);
+  }
+
+  .spacing-lg {
+    margin-bottom: var(--spacing-md);
+  }
+}
+
+/* ─── Small Mobile (Below 360px) ─── */
+@media (max-width: 360px) {
+  h1 {
+    font-size: var(--font-size-2xl);
+  }
+
+  h2 {
+    font-size: var(--font-size-xl);
+  }
+
+  .card {
+    padding: var(--spacing-md);
+  }
+
+  .btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-sm);
+  }
+
+  .grid {
+    gap: var(--spacing-md);
+  }
+}
+
+/* ─── Touch Devices ─── */
+@media (hover: none) and (pointer: coarse) {
+  .btn {
+    padding: var(--spacing-md) var(--spacing-xl);
+    min-height: 44px;
+  }
+
+  input,
+  textarea,
+  select {
+    min-height: 44px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  .nav-link::after {
+    height: 3px;
+  }
+}
+
+/* ─── High Density Displays ─── */
+@media (-webkit-min-device-pixel-ratio: 2),
+       (min-resolution: 192dpi) {
+  .border {
+    border-width: 0.5px;
+  }
+}
+
+/* ─── Dark Mode Specific ─── */
+@media (prefers-color-scheme: dark) {
+  .glow-effect {
+    filter: drop-shadow(0 0 20px rgba(79, 172, 254, 0.3));
+  }
+}
+
+/* ─── Light Mode Specific ─── */
+@media (prefers-color-scheme: light) {
+  .glow-effect {
+    filter: drop-shadow(0 0 20px rgba(79, 172, 254, 0.2));
+  }
+}
+
+/* ─── Landscape Mobile ─── */
+@media (max-height: 500px) {
+  nav {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  h1 {
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .card {
+    padding: var(--spacing-md);
+  }
+}
+
+/* ─── Print Styles ─── */
+@media print {
+  nav {
+    display: none;
+  }
+
+  .btn-close {
+    display: none;
+  }
+
+  .btn:not(.btn-print) {
+    display: none;
+  }
+
+  body {
+    background: white;
+  }
+
+  .card {
+    page-break-inside: avoid;
+    border: 1px solid #ddd;
+  }
+}
+
+/* ─── Responsive Typography ─── */
+@media (max-width: 640px) {
+  body {
+    font-size: var(--font-size-sm);
+  }
+
+  h1 {
+    font-size: var(--font-size-2xl);
+  }
+
+  h2 {
+    font-size: var(--font-size-xl);
+  }
+
+  h3 {
+    font-size: var(--font-size-lg);
+  }
+}
+
+/* ─── Responsive Spacing ─── */
+@media (max-width: 768px) {
+  .spacing-2xl {
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .padding-2xl {
+    padding: var(--spacing-lg);
+  }
+}
+
+/* ─── Responsive Grid ─── */
+@media (max-width: 640px) {
+  .grid-cols-2,
+  .grid-cols-3,
+  .grid-cols-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .grid-cols-3,
+  .grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ─── Modal Responsive ─── */
+@media (max-width: 640px) {
+  .modal {
+    max-width: calc(100% - 2rem);
+    max-height: calc(100vh - 2rem);
+  }
+}
+
+/* ─── Navbar Responsive ─── */
+@media (max-width: 768px) {
+  nav {
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+  }
+
+  .nav-links {
+    flex-direction: column;
+    gap: var(--spacing-md);
+    width: 100%;
+    order: 3;
+  }
+
+  .logo {
+    font-size: var(--font-size-xl);
+  }
+}
+
+/* ─── Button Responsive ─── */
+@media (max-width: 640px) {
+  .btn-group {
+    flex-direction: column;
+  }
+
+  .btn-group .btn {
+    width: 100%;
+  }
+}
+
+/* ─── Card Responsive ─── */
+@media (max-width: 768px) {
+  .card-footer {
+    flex-direction: column;
+  }
+
+  .card-footer .btn {
+    width: 100%;
+  }
+}
+
+/* ─── Toast Responsive ─── */
+@media (max-width: 640px) {
+  .toast {
+    bottom: 0;
+    right: 0;
+    left: 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    max-width: 100%;
+  }
+}
+
+/* ─── Avatar Groups ─── */
+@media (max-width: 768px) {
+  .avatar-group {
+    gap: var(--spacing-sm);
+  }
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* ─── Container Responsive ─── */
+@media (max-width: 640px) {
+  .container {
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+  }
+}
+
+/* ─── Orientation Changes ─── */
+@media (orientation: portrait) {
+  .hidden-portrait {
+    display: none;
+  }
+}
+
+@media (orientation: landscape) {
+  .hidden-landscape {
+    display: none;
+  }
+}
+
+/* ─── Flex Responsive ─── */
+@media (max-width: 768px) {
+  .flex-col-reverse-mobile {
+    flex-direction: column-reverse;
+  }
+
+  .flex-center-mobile {
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+/* ─── Gap Responsive ─── */
+@media (max-width: 640px) {
+  .gap-lg {
+    gap: var(--spacing-md);
+  }
+
+  .gap-2xl {
+    gap: var(--spacing-lg);
+  }
+}
+
+/* ─── Display Responsive ─── */
+@media (max-width: 768px) {
+  .hidden-mobile {
+    display: none;
+  }
+}
+
+@media (min-width: 769px) {
+  .visible-mobile {
+    display: none;
+  }
+}

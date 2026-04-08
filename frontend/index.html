@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Clinic Appointment System - Book appointments with specialist doctors" />
+  <meta name="theme-color" content="#0a0e27" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  
+  <title>🏥 Clinic Appointment System</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>" />
+
+  <!-- CSS Files -->
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+  <link rel="stylesheet" href="css/utilities.css" />
+
+  <!-- Page-specific Styles -->
+  <style>
+    /* Hero animations */
+    .hero h1 {
+      animation: slideUp 600ms cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    .hero p {
+      animation: slideUp 600ms cubic-bezier(0.19, 1, 0.22, 1) 100ms both;
+    }
+
+    .hero button {
+      animation: slideUp 600ms cubic-bezier(0.19, 1, 0.22, 1) 200ms both;
+    }
+
+    /* Stagger children */
+    .stagger-children > * {
+      animation: slideUp 600ms cubic-bezier(0.19, 1, 0.22, 1) both;
+    }
+
+    .stagger-children > :nth-child(1) { animation-delay: 0ms; }
+    .stagger-children > :nth-child(2) { animation-delay: 100ms; }
+    .stagger-children > :nth-child(3) { animation-delay: 200ms; }
+
+    /* Navbar styling */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 2rem;
+      padding: 1rem 1.5rem;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 250ms;
+    }
+
+    .logo:hover {
+      transform: scale(1.05);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+      align-items: center;
+    }
+
+    .nav-link {
+      position: relative;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 250ms;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--gradient-primary);
+      transform: scaleX(0);
+      transition: transform 250ms;
+    }
+
+    .nav-link:hover::after,
+    .nav-link.active::after {
+      transform: scaleX(1);
+    }
+
+    .nav-link.active {
+      color: var(--neon-blue);
+    }
+
+    #theme-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.25rem;
+      transition: all 250ms;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+    }
+
+    #theme-toggle:hover {
+      background: var(--surface-secondary);
+      transform: spin 1s linear;
+    }
+
+    /* Main app container */
+    #app {
+      flex: 1;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Responsive navbar */
+    @media (max-width: 768px) {
+      nav {
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .nav-links {
+        width: 100%;
+        gap: 1rem;
+        order: 3;
+      }
+
+      .logo {
+        font-size: 1.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav role="navigation" aria-label="Main navigation">
+    <div class="logo" title="Go to home">
+      🏥 Clinic
+    </div>
+    <ul class="nav-links">
+      <li><a class="nav-link active" data-page="home">Home</a></li>
+      <li><a class="nav-link" data-page="doctors">Doctors</a></li>
+      <li><a class="nav-link" data-page="book">Book</a></li>
+      <li><a class="nav-link" data-page="history">History</a></li>
+      <li><a class="nav-link" data-page="profile">Profile</a></li>
+    </ul>
+    <button id="theme-toggle" title="Toggle dark/light mode" aria-label="Toggle theme">
+      ☀️
+    </button>
+  </nav>
+
+  <!-- Main App Container -->
+  <div id="app" role="main"></div>
+
+  <!-- JavaScript Modules -->
+  <script type="module" src="js/app.js"></script>
+
+  <!-- Service Worker (PWA) -->
+  <script>
+    // Register service worker if available
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {
+        console.log('Service worker not available');
+      });
+    }
+
+    // Log app start
+    console.log('🏥 Clinic Appointment System loading...');
+  </script>
+
+  <!-- Analytics placeholder -->
+  <noscript>
+    <p>This application requires JavaScript to run.</p>
+  </noscript>
+</body>
+</html>
