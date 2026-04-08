@@ -306,13 +306,42 @@ textarea {
   font-family: inherit;
 }
 
-/* ─── Form Validation ─── */
+/* ─── Form Validation (Enhanced) ─── */
 input:valid:not(:placeholder-shown) {
   border-color: var(--success);
 }
 
 input:invalid:not(:placeholder-shown) {
   border-color: var(--error);
+}
+
+input.is-valid,
+textarea.is-valid,
+select.is-valid {
+  border-color: var(--success) !important;
+  background: rgba(0, 208, 132, 0.05) !important;
+  box-shadow: 0 0 0 3px rgba(0, 208, 132, 0.15), 0 0 15px rgba(0, 208, 132, 0.2) !important;
+}
+
+input.is-invalid,
+textarea.is-invalid,
+select.is-invalid {
+  border-color: var(--error) !important;
+  background: rgba(255, 107, 107, 0.05) !important;
+  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.15), 0 0 15px rgba(255, 107, 107, 0.2) !important;
+  animation: shake 300ms cubic-bezier(0.36, 0, 0.66, -0.56);
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-5px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(5px);
+  }
 }
 
 .form-error {
@@ -322,6 +351,7 @@ input:invalid:not(:placeholder-shown) {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  animation: slideDown 300ms ease;
 }
 
 .form-success {
@@ -331,6 +361,7 @@ input:invalid:not(:placeholder-shown) {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  animation: slideDown 300ms ease;
 }
 
 /* ─── Badges ─── */
@@ -1227,4 +1258,126 @@ input:invalid:not(:placeholder-shown) {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
   }
+}
+
+/* ─── Notification Container ─── */
+.notification-container {
+  position: fixed;
+  top: var(--spacing-lg);
+  right: var(--spacing-lg);
+  z-index: var(--z-notification);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  max-width: 400px;
+}
+
+/* ─── Toast Notifications ─── */
+.toast {
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(10, 14, 39, 0.95);
+  backdrop-filter: blur(10px);
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: flex-start;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  animation: slideInRight 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  opacity: 0;
+  transform: translateX(400px);
+  transition: all 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(400px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.toast-success {
+  border-color: rgba(0, 208, 132, 0.3);
+  box-shadow: 0 0 20px rgba(0, 208, 132, 0.2), 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.toast-error {
+  border-color: rgba(255, 107, 107, 0.3);
+  box-shadow: 0 0 20px rgba(255, 107, 107, 0.2), 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.toast-warning {
+  border-color: rgba(255, 165, 0, 0.3);
+  box-shadow: 0 0 20px rgba(255, 165, 0, 0.2), 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.toast-info {
+  border-color: rgba(79, 172, 254, 0.3);
+  box-shadow: 0 0 20px rgba(79, 172, 254, 0.2), 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.toast-icon {
+  font-size: var(--font-size-lg);
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toast-success .toast-icon {
+  color: var(--success);
+}
+
+.toast-error .toast-icon {
+  color: var(--error);
+}
+
+.toast-warning .toast-icon {
+  color: var(--warning);
+}
+
+.toast-info .toast-icon {
+  color: var(--neon-blue);
+}
+
+.toast-content {
+  flex: 1;
+}
+
+.toast-message {
+  font-size: var(--font-size-sm);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: var(--font-size-lg);
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 150ms ease;
+  flex-shrink: 0;
+}
+
+.toast-close:hover {
+  color: var(--text);
+  transform: scale(1.1);
 }
