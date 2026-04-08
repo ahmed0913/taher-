@@ -3,19 +3,119 @@
  * ═══════════════════════════════════════════════════════════════ */
 
 export const mockDoctors = [
-  { id: 1, name: 'Dr. Ahmed Hassan', specialization: 'Cardiology' },
-  { id: 2, name: 'Dr. Sara Mahmoud', specialization: 'Dermatology' },
-  { id: 3, name: 'Dr. Omar Khaled', specialization: 'Orthopedics' },
-  { id: 4, name: 'Dr. Nadia Farouk', specialization: 'Pediatrics' },
-  { id: 5, name: 'Dr. Youssef Nabil', specialization: 'Neurology' }
+  {
+    id: 1,
+    name: 'Dr. Ahmed Hassan',
+    specialization: 'Cardiology',
+    image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&h=400&fit=crop&crop=faces',
+    rating: 4.9,
+    reviews: 187,
+    nextAvailable: '2025-08-01',
+    price: 500,
+    bio: 'Expert cardiologist with 15+ years of experience',
+    availability: ['09:00', '10:30', '14:00', '15:30']
+  },
+  {
+    id: 2,
+    name: 'Dr. Sara Mahmoud',
+    specialization: 'Dermatology',
+    image: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=400&fit=crop&crop=faces',
+    rating: 4.8,
+    reviews: 142,
+    nextAvailable: '2025-08-02',
+    price: 450,
+    bio: 'Specialized in skin care and treatments',
+    availability: ['10:00', '11:30', '13:00', '16:00']
+  },
+  {
+    id: 3,
+    name: 'Dr. Omar Khaled',
+    specialization: 'Orthopedics',
+    image: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=400&h=400&fit=crop&crop=faces',
+    rating: 4.7,
+    reviews: 156,
+    nextAvailable: '2025-08-03',
+    price: 480,
+    bio: 'Specialist in bone and joint health',
+    availability: ['08:30', '10:00', '15:00', '16:30']
+  },
+  {
+    id: 4,
+    name: 'Dr. Nadia Farouk',
+    specialization: 'Pediatrics',
+    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&crop=faces',
+    rating: 4.85,
+    reviews: 201,
+    nextAvailable: '2025-08-04',
+    price: 400,
+    bio: 'Dedicated to children\'s health and development',
+    availability: ['09:00', '10:30', '13:00', '14:30']
+  },
+  {
+    id: 5,
+    name: 'Dr. Youssef Nabil',
+    specialization: 'Neurology',
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=faces',
+    rating: 4.92,
+    reviews: 218,
+    nextAvailable: '2025-08-05',
+    price: 550,
+    bio: 'Expert in neurological disorders and treatment',
+    availability: ['08:00', '09:30', '14:00', '16:00']
+  }
 ];
 
 export const mockPatients = [
-  { id: 1, name: 'Mohamed Ali', phone: '01001234567', email: 'mohamed@email.com' },
-  { id: 2, name: 'Hana Mostafa', phone: '01112345678', email: 'hana@email.com' },
-  { id: 3, name: 'Karim Samy', phone: '01223456789', email: 'karim@email.com' },
-  { id: 4, name: 'Laila Adel', phone: '01334567890', email: 'laila@email.com' },
-  { id: 5, name: 'Tarek Ibrahim', phone: '01445678901', email: 'tarek@email.com' }
+  { 
+    id: 1, 
+    name: 'Mohamed Ali', 
+    phone: '01001234567', 
+    email: 'mohamed@email.com',
+    age: 35,
+    gender: 'Male',
+    bloodType: 'O+',
+    allergies: 'None'
+  },
+  { 
+    id: 2, 
+    name: 'Hana Mostafa', 
+    phone: '01112345678', 
+    email: 'hana@email.com',
+    age: 28,
+    gender: 'Female',
+    bloodType: 'A+',
+    allergies: 'Penicillin'
+  },
+  { 
+    id: 3, 
+    name: 'Karim Samy', 
+    phone: '01223456789', 
+    email: 'karim@email.com',
+    age: 42,
+    gender: 'Male',
+    bloodType: 'B+',
+    allergies: 'None'
+  },
+  { 
+    id: 4, 
+    name: 'Laila Adel', 
+    phone: '01334567890', 
+    email: 'laila@email.com',
+    age: 31,
+    gender: 'Female',
+    bloodType: 'AB+',
+    allergies: 'Iodine'
+  },
+  { 
+    id: 5, 
+    name: 'Tarek Ibrahim', 
+    phone: '01445678901', 
+    email: 'tarek@email.com',
+    age: 38,
+    gender: 'Male',
+    bloodType: 'O-',
+    allergies: 'None'
+  }
 ];
 
 export const mockAppointments = [
