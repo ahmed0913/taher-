@@ -180,7 +180,10 @@ class ClinicApp {
    * Render page
    */
   async renderPage(page) {
-    const pageObj = this.pages[page];
+    // Clean page name: remove query params and hash symbols
+    const [cleanPage] = (page || '').replace('#', '').trim().split('?');
+    const finalPage = cleanPage || 'home';
+    const pageObj = this.pages[finalPage];
 
     if (!pageObj) {
       console.error('❌ Page not found:', page);
@@ -197,7 +200,7 @@ class ClinicApp {
       // Update nav active states
       document.querySelectorAll('.nav-link').forEach(link => {
         link.classList.remove('active');
-        if (link.getAttribute('data-page') === page) {
+        if (link.getAttribute('data-page') === finalPage) {
           link.classList.add('active');
         }
       });
@@ -210,17 +213,17 @@ class ClinicApp {
       }
 
       // Render page
-      this.currentPage = page;
+      this.currentPage = finalPage;
       await pageObj.render(container);
 
-      console.log('✅ Page rendered:', page);
+      console.log('✅ Page rendered:', finalPage);
 
     } catch (error) {
       console.error('❌ Failed to render page:', error);
       toast.error('Failed to load page');
 
       // Fallback to home
-      if (page !== 'home') {
+      if (finalPage !== 'home') {
         await this.navigate('home');
       }
     }

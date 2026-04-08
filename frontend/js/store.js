@@ -180,14 +180,20 @@ class Store {
   _initPersistence() {
     this.persistentKeys = ['theme', 'user', 'sidebar'];
 
-    // Load persisted values
+    // Load persisted values with safe parsing
     for (const key of this.persistentKeys) {
       const saved = localStorage.getItem(`clinic_${key}`);
       if (saved) {
         try {
-          this.state[key] = JSON.parse(saved);
+          // Safe parsing: check if it's JSON object format first
+          const parsed = saved.trim().startsWith('{') || saved.trim().startsWith('[') 
+            ? JSON.parse(saved) 
+            : saved;
+          this.state[key] = parsed;
         } catch (e) {
           console.warn(`Failed to parse persisted state: ${key}`, e);
+          // Fallback to original value if parsing fails
+          this.state[key] = saved;
         }
       }
     }
