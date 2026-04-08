@@ -17,8 +17,15 @@ export class BookPage {
     this.doctors = [];
     this.patients = [];
     this.currentStep = 1;
-    this.formData = storage.getAppointmentDraft() || {};
+    this.formData = storage.getAppointmentDraft() || {
+      patient: null,
+      doctor: null,
+      date: null,
+      time: null,
+      isNewPatient: false
+    };
     this.container = null;
+    this.selectedTimeSlot = null;
   }
 
   /**
@@ -258,16 +265,19 @@ export class BookPage {
   }
 
   /**
-   * Step 3: Select Date
+   * Step 3: Select Date & Time
    */
   renderDateStep() {
+    const selectedDate = this.formData.date;
+    const timeSlots = selectedDate ? this.generateTimeSlots(selectedDate) : [];
+
     return `
       <div class="card">
-        <h2 style="margin-bottom: 1.5rem;">Step 3: Choose Date</h2>
+        <h2 style="margin-bottom: 1.5rem;">Step 3: Choose Date & Time</h2>
 
         <div class="form-group">
           <label>Appointment Date</label>
-          <input type="date" id="appointment-date" style="
+          <input type="date" id="appointment-date" value="${selectedDate || ''}" style="
             background: var(--surface-secondary);
             border: 1px solid var(--border);
             border-radius: 0.5rem;
@@ -285,6 +295,31 @@ export class BookPage {
           margin-bottom: 1rem;
         "></div>
 
+        ${selectedDate ? `
+          <div style="margin-top: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.75rem;">Available Time Slots</label>
+            <div class="time-slots-grid">
+              ${timeSlots.map(slot => `
+                <button 
+                  type="button"
+                  class="time-slot ${slot.available ? '' : 'unavailable'} ${this.formData.time === slot.time ? 'selected' : ''}"
+                  data-time="${slot.time}"
+                  style="cursor: ${slot.available ? 'pointer' : 'not-allowed'};"
+                  ${!slot.available ? 'disabled' : ''}
+                >
+                  ${slot.time}
+                </button>
+              `).join('')}
+            </div>
+            <div id="time-error" style="
+              color: var(--error);
+              font-size: 0.875rem;
+              display: none;
+              margin-top: 1rem;
+            "></div>
+          </div>
+        ` : ''}
+
         <div style="display: flex; gap: 1rem; margin-top: 2rem;">
           <button class="btn btn-outline" id="prev-step-3" style="flex: 1; cursor: pointer;">
             ← Back
@@ -296,6 +331,50 @@ export class BookPage {
       </div>
     `;
   }
+
+  /**
+   * Generate time slots for a given date
+   */
+  generateTimeSlots(date) {
+    const slots = [];
+    const startHour = 9;  // 9 AM
+    const endHour = 17;   // 5 PM
+    
+    for (let hour = startHour; hour < endHour; hour++) {
+      for (let min of ['00', '30']) {
+        const isPM = hour >= 12;
+        const displayHour = hour % 12 || 12;
+        const displayMin = min;
+        const period = isPM ? 'PM' : 'AM';
+        const time = `${displayHour}:${displayMin} ${period}`;
+        
+        // Mock: 70% of slots are available
+        const available = Math.random() > 0.3;
+        
+        slots.push({
+          time: time,
+          available: available
+        });
+      }
+    }
+    
+    return slots;
+  }
+
+  /**
+   * Validate booking data
+   */
+  validateStep(step) {
+    switch(step) {
+      case 1:
+        return this.formData.patient !== null;
+      case 2:
+        return this.formData.doctor !== null;
+      case 3:
+        return this.formData.date !== null && this.formData.time !== null;
+      default:
+        return false;
+    }
 
   /**
    * Setup all event listeners
@@ -323,7 +402,36 @@ export class BookPage {
       dom.safeAddListener(nextBtn2, 'click', () => this.handleNextStep());
     }
 
-    // Step 3 - Date and confirm
+    // Step 3 - Date, time and confirm
+    const dateInput = dom.safeQuery('#appointment-date', this.container);
+    if (dateInput) {
+      dom.safeAddListener(dateInput, 'change', (e) => {
+        this.formData.date = e.target.value;
+        this.formData.time = null; // Reset time when date changes
+        storage.saveAppointmentDraft(this.formData);
+        this.renderForm();
+        this.setupEventListeners();
+      });
+    }
+
+    // Time slot selection
+    const timeSlots = dom.safeQueryAll('.time-slot:not(.unavailable)', this.container);
+    timeSlots.forEach(slot => {
+      dom.safeAddListener(slot, 'click', (e) => {
+        e.preventDefault();
+        const time = dom.safeGetAttr(slot, 'data-time');
+        
+        // Deselect all
+        const allSlots = dom.safeQueryAll('.time-slot', this.container);
+        allSlots.forEach(s => dom.safeRemoveClass(s, 'selected'));
+        
+        // Select this one
+        dom.safeAddClass(slot, 'selected');
+        this.formData.time = time;
+        storage.saveAppointmentDraft(this.formData);
+      });
+    });
+
     const prevBtn3 = dom.safeQuery('#prev-step-3', this.container);
     if (prevBtn3) {
       dom.safeAddListener(prevBtn3, 'click', () => this.handlePrevStep());
@@ -385,18 +493,24 @@ export class BookPage {
       const phone = dom.safeQuery('#patient-phone', this.container)?.value;
 
       if (selectedId) {
-        this.formData.patient_id = parseInt(selectedId);
-      } else if (email && name && phone) {
+        // Using existing patient
+        this.formData.patient = parseInt(selectedId);
+        this.formData.isNewPatient = false;
+      } else if (email || name || phone) {
+        // Creating new patient
+        if (!email || !name || !phone) {
+          toast.error('Please enter all patient details');
+          return;
+        }
         const validation = validators.validatePatient({ name, email, phone });
         if (!validation.isValid) {
           toast.error(validation.errors[0]);
           return;
         }
-        this.formData.patient_email = email;
-        this.formData.patient_name = name;
-        this.formData.patient_phone = phone;
+        this.formData.patient = { name, email, phone };
+        this.formData.isNewPatient = true;
       } else {
-        toast.error('Please select or enter patient details');
+        toast.error('Please select an existing patient or enter new patient details');
         return;
       }
 
@@ -407,7 +521,7 @@ export class BookPage {
         toast.error('Please select a doctor');
         return;
       }
-      this.formData.doctor_id = parseInt(doctorId);
+      this.formData.doctor = parseInt(doctorId);
       this.currentStep = 3;
     }
 
@@ -431,8 +545,10 @@ export class BookPage {
    * Handle confirm booking
    */
   async handleConfirmBooking() {
-    const appointmentDate = dom.safeQuery('#appointment-date', this.container)?.value;
+    const appointmentDate = this.formData.date;
+    const appointmentTime = this.formData.time;
     const dateError = dom.safeQuery('#date-error', this.container);
+    const timeError = dom.safeQuery('#time-error', this.container);
 
     if (!appointmentDate) {
       if (dateError) {
@@ -442,14 +558,11 @@ export class BookPage {
       return;
     }
 
-    const validation = validators.validateAppointment({
-      patient_id: this.formData.patient_id,
-      doctor_id: this.formData.doctor_id,
-      date: appointmentDate
-    });
-
-    if (!validation.isValid) {
-      toast.error(validation.errors[0]);
+    if (!appointmentTime) {
+      if (timeError) {
+        dom.safeSetText(timeError, 'Please select a time');
+        dom.safeSetStyle(timeError, 'display', 'block');
+      }
       return;
     }
 
@@ -458,17 +571,76 @@ export class BookPage {
       const formDiv = dom.safeQuery('#booking-form', this.container);
       if (formDiv) dom.safeSetStyle(formDiv, 'display', 'none');
 
-      const result = await appointmentsApi.create({
-        patient_id: this.formData.patient_id,
-        doctor_id: this.formData.doctor_id,
-        date: appointmentDate
-      });
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      console.log('✅ Appointment created:', result);
+      // Generate appointment ID
+      const appointmentId = `APT-${Date.now()}`;
+      const selectedDoctor = this.doctors.find(d => d.id === this.formData.doctor);
+
+      // Create appointment object
+      const appointment = {
+        id: appointmentId,
+        patient: this.formData.patient,
+        isNewPatient: this.formData.isNewPatient,
+        doctor: selectedDoctor,
+        date: appointmentDate,
+        time: appointmentTime,
+        status: 'confirmed',
+        createdAt: new Date().toISOString()
+      };
+
+      // Save to localStorage
+      const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+      appointments.push(appointment);
+      localStorage.setItem('appointments', JSON.stringify(appointments));
+
+      console.log('✅ Appointment confirmed:', appointment);
 
       storage.clearAppointmentDraft();
       const successDiv = dom.safeQuery('#booking-success', this.container);
-      if (successDiv) dom.safeSetStyle(successDiv, 'display', 'block');
+      if (successDiv) {
+        dom.safeSetHTML(successDiv, `
+          <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
+          <h2 style="margin-bottom: 1rem;">Appointment Booked!</h2>
+          <div style="
+            background: rgba(0, 195, 255, 0.1);
+            border: 1px solid var(--neon-blue);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: left;
+          ">
+            <div style="margin-bottom: 1rem;">
+              <strong style="color: var(--neon-blue);">Confirmation ID:</strong><br/>
+              <code style="color: var(--text-secondary);">${appointmentId}</code>
+            </div>
+            <div style="margin-bottom: 1rem;">
+              <strong style="color: var(--neon-blue);">Doctor:</strong><br/>
+              <span style="color: var(--text-secondary);">${selectedDoctor.name} - ${selectedDoctor.specialization}</span>
+            </div>
+            <div style="margin-bottom: 1rem;">
+              <strong style="color: var(--neon-blue);">Date & Time:</strong><br/>
+              <span style="color: var(--text-secondary);">${appointmentDate} at ${appointmentTime}</span>
+            </div>
+          </div>
+          <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+            A confirmation email has been sent to your registered email address.
+          </p>
+          <button class="btn btn-primary" id="view-appointments-btn" style="cursor: pointer;">
+            📅 View My Appointments
+          </button>
+        `);
+        dom.safeSetStyle(successDiv, 'display', 'block');
+        
+        // Re-attach listener
+        const viewBtn = dom.safeQuery('#view-appointments-btn', this.container);
+        if (viewBtn) {
+          dom.safeAddListener(viewBtn, 'click', () => {
+            if (window.app) window.app.navigate('history');
+          });
+        }
+      }
       toast.success('Appointment booked successfully!');
 
     } catch (error) {
