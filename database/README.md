@@ -1,145 +1,176 @@
-# 🏥 قاعدة بيانات عيادة الأسنان - Database Setup
+🗄️ Clinic Management System - Database Schema
+📊 Entity Relationship Diagram
+![ER Diagram](./er-diagram.png)
 
-## 📋 الإعدادات المطلوبة (Prerequisites)
+Figure 1: Complete ER Diagram showing all entities, relationships, and attributes
 
-- SQL Server 2019 أو أحدث
-- SQL Server Management Studio (SSMS)
-- Windows Authentication متفعل
+📋 Overview
+This database schema is designed for a Clinic Appointment Management System. It follows Third Normal Form (3NF) to eliminate redundancy and ensure data integrity.
 
-## 🚀 خطوات التثبيت (Installation Steps)
+Key Design Principles:
+✅ Normalization: All tables are in 3NF
 
-### 1. فتح قاعدة البيانات (Open Database)
+✅ Referential Integrity: Foreign keys with CASCADE operations
 
-```sql
--- إذا كانت قاعدة البيانات موجودة بالفعل
-DROP DATABASE IF EXISTS clinic_db;
+✅ Data Validation: NOT NULL, UNIQUE constraints
 
--- إنشاء قاعدة البيانات الجديدة
+✅ Scalability: Designed for future expansion
+
+📚 Tables Documentation
+1. Doctors Table
+Stores information about medical specialists.
+
+Column	Type	Constraints	Description
+id	INT	PRIMARY KEY, IDENTITY	Unique doctor identifier
+name	VARCHAR(100)	NOT NULL	Doctor's full name
+specialization	VARCHAR(100)	NOT NULL	Medical specialty
+Sample Data:
+
+SQL
+INSERT INTO doctors (name, specialization) VALUES
+('Dr. Ahmed Hassan', 'Cardiology'),
+('Dr. Sara Mahmoud', 'Dermatology'),
+('Dr. Omar Khaled', 'Orthopedics');
+2. Patients Table
+Stores patient personal and contact information.
+
+Column	Type	Constraints	Description
+id	INT	PRIMARY KEY, IDENTITY	Unique patient identifier
+name	VARCHAR(100)	NOT NULL	Patient's full name
+phone	VARCHAR(20)	NOT NULL	Contact phone number
+email	VARCHAR(100)	UNIQUE, NOT NULL	Email address (unique)
+Constraints:
+
+Email must be unique (no duplicate accounts)
+
+3. Appointments Table
+Stores appointment scheduling information.
+
+Column	Type	Constraints	Description
+id	INT	PRIMARY KEY, IDENTITY	Unique appointment identifier
+date	DATE	NOT NULL	Appointment date
+time	TIME	NOT NULL	Appointment time
+Relationships:
+
+One patient can have many appointments (1:N)
+
+One appointment belongs to one patient only
+
+4. patient_doctors (Junction Table)
+Implements Many-to-Many relationship between Patients and Doctors.
+
+Column	Type	Constraints	Description
+patient_id	INT	PRIMARY KEY, FOREIGN KEY	References Patients(id)
+doctor_id	INT	PRIMARY KEY, FOREIGN KEY	References Doctors(id)
+Composite Primary Key: (patient_id, doctor_id)
+
+Purpose:
+
+Tracks which patients are treated by which doctors
+
+Allows one patient to have multiple doctors
+
+Allows one doctor to have multiple patients
+
+Cascade Rules:
+
+ON DELETE CASCADE: If a patient or doctor is deleted, their relationship is removed
+
+5. appointment_doctors (Junction Table)
+Implements Many-to-Many relationship between Appointments and Doctors.
+
+Column	Type	Constraints	Description
+appointment_id	INT	PRIMARY KEY, FOREIGN KEY	References Appointments(id)
+doctor_id	INT	PRIMARY KEY, FOREIGN KEY	References Doctors(id)
+Composite Primary Key: (appointment_id, doctor_id)
+
+Purpose:
+
+Allows multiple doctors to attend a single appointment (e.g., consultation)
+
+Tracks which doctors are assigned to which appointments
+
+Cascade Rules:
+
+ON DELETE CASCADE: If appointment or doctor is deleted, assignment is removed
+
+🔗 Relationships Explained
+Relationship Diagram
+
+Plaintext
+Doctors ──────< patient_doctors >────── Patients
+   │                                      │
+   │                                      │
+   └──────< appointment_doctors >───── Appointments
+Cardinality:
+
+Relationship	Type	Description
+Doctors ⟷ Patients	Many-to-Many (M:N)	One doctor treats many patients; One patient sees many doctors
+Patients → Appointments	One-to-Many (1:N)	One patient has many appointments
+Doctors ⟷ Appointments	Many-to-Many (M:N)	One doctor conducts many appointments; One appointment can have multiple doctors
+📝 SQL Schema File
+The complete SQL schema is available in:
+
+File: clinic_schema.sql
+
+Database: SQL Server (T-SQL)
+
+Compatibility: SQL Server 2016+
+
+🚀 Setup Instructions
+1. Create Database
+
+SQL
 CREATE DATABASE clinic_db;
 USE clinic_db;
-```
+2. Run Schema
 
-### 2. تنفيذ ملف الـ Script
+Bash
+# Execute the schema file
+sqlcmd -S localhost -U sa -P YourPassword -i clinic_schema.sql
+3. Verify Tables
 
-1. افتح **SQL Server Management Studio**
-2. Connect to your SQL Server instance
-3. اضغط على **File → Open → File**
-4. اختر ملف `Clinc.sql`
-5. اضغط **Execute** أو اضغط `F5`
+SQL
+-- List all tables
+SELECT TABLE_NAME 
+FROM INFORMATION_SCHEMA.TABLES 
+WHERE TABLE_TYPE = 'BASE TABLE';
+🔍 Sample Queries
+Find all patients treated by a specific doctor:
 
-أو عن طريق Command Line:
+SQL
+SELECT 
+    a.id AS appointment_id,
+    a.date,
+    a.time,
+    d.name AS doctor_name,
+    d.specialization
+FROM appointments a
+JOIN appointment_doctors ad ON a.id = ad.appointment_id
+JOIN doctors d ON ad.doctor_id = d.id
+WHERE a.patient_id = 1
+ORDER BY a.date, a.time;
+📊 Database Statistics
+Table	Sample Records	Purpose
+Doctors	5	Medical specialists
+Patients	5	Registered patients
+Appointments	5	Scheduled appointments
+patient_doctors	7	Patient-doctor relationships
+appointment_doctors	6	Appointment-doctor assignments
+🔐 Security Considerations
+Patient Data: Email addresses are unique and should be validated
 
-```bash
-sqlcmd -S YOUR_SERVER_NAME -U sa -P YOUR_PASSWORD -i Clinc.sql
-```
+Cascade Deletes: Be careful when deleting doctors/patients as it affects related records
 
-### 3. التحقق من التثبيت (Verification)
+Appointment Integrity: Appointments should have proper date/time validation
 
-```sql
--- تحقق من الجداول
-SELECT * FROM doctors;
-SELECT * FROM patients;
-SELECT * FROM appointments;
-```
+📈 Future Enhancements
+Potential schema improvements:
 
-## 🗄️ هيكل البيانات (Database Schema)
+Add created_at and updated_at timestamps to all tables
 
-### جدول الأطباء (Doctors Table)
-| Column | Type | Notes |
-|--------|------|-------|
-| id | INT (PK, Identity) | معرف فريد |
-| name | VARCHAR(100) | اسم الطبيب |
-| specialization | VARCHAR(100) | التخصص |
+Add status field to appointments (scheduled, confirmed, completed, cancelled)
 
-### جدول المرضى (Patients Table)
-| Column | Type | Notes |
-|--------|------|-------|
-| id | INT (PK, Identity) | معرف فريد |
-| name | VARCHAR(100) | اسم المريض |
-| phone | VARCHAR(20) | رقم الهاتف |
-| email | VARCHAR(100) | البريد الإلكتروني (فريد) |
+Add indexes on frequently queried columns (email, specialization, date)
 
-### جدول المواعيد (Appointments Table)
-| Column | Type | Notes |
-|--------|------|-------|
-| id | INT (PK, Identity) | معرف فريد |
-| patient_id | INT (FK) | معرف المريض |
-| doctor_id | INT (FK) | معرف الطبيب |
-| date | DATE | تاريخ الموعد |
-
-## 🔗 العلاقات (Relationships)
-
-- **Appointments → Patients**: Many-to-One (علاقة من-إلى-كثير)
-  - `ON DELETE CASCADE`: حذف المواعيد عند حذف المريض
-  
-- **Appointments → Doctors**: Many-to-One
-  - `ON DELETE CASCADE`: حذف المواعيد عند حذف الطبيب
-
-## 📊 البيانات الأساسية (Sample Data)
-
-### الأطباء (5 Doctors)
-1. Dr. Ahmed Hassan - Cardiology
-2. Dr. Sara Mahmoud - Dermatology
-3. Dr. Omar Khaled - Orthopedics
-4. Dr. Nadia Farouk - Pediatrics
-5. Dr. Youssef Nabil - Neurology
-
-### المرضى (5 Patients)
-1. Mohamed Ali
-2. Hana Mostafa
-3. Karim Samy
-4. Laila Adel
-5. Tarek Ibrahim
-
-### المواعيد (5 Appointments)
-جميعها في أغسطس 2025
-
-## 🐛 استكشاف الأخطاء (Troubleshooting)
-
-### خطأ: "Database already exists"
-```sql
-DROP DATABASE clinic_db;
--- ثم قم بتشغيل Clinc.sql مجددًا
-```
-
-### خطأ: "Permission denied"
-- تأكد من استخدام Admin account
-- أو استخدم `USE master;` أولاً
-
-### خطأ: "Invalid object name"
-- تأكد من تشغيل Script بالكامل
-- لا تقطع التنفيذ في النصف
-
-## 📝 ملاحظات مهمة
-
-✅ جميع البيانات محفوظة كما هي  
-✅ الـ IDs تبدأ من 1  
-✅ لا توجد قيود تاريخية  
-✅ يمكن إضافة مواعيد مستقبلية وماضية  
-
-## 🔄 إعادة تعيين البيانات (Reset Data)
-
-إذا أردت العودة للبيانات الأصلية:
-
-```sql
-USE clinic_db;
-
--- حذف جميع البيانات
-DELETE FROM appointments;
-DELETE FROM patients;
-DELETE FROM doctors;
-
--- إعادة تعيين IDs
-DBCC CHECKIDENT ('doctors', RESEED, 0);
-DBCC CHECKIDENT ('patients', RESEED, 0);
-DBCC CHECKIDENT ('appointments', RESEED, 0);
-
--- ثم قم بتشغيل Clinc.sql again
-```
-
-## 📞 دعم تقني (Support)
-
-للمساعدة في إعدادات قاعدة البيانات، يرجى التحقق من:
-- SQL Server logs (Event Viewer)
-- SSMS messages tab
-- Console output من sqlcmd
+Add audit trail table for tracking changes
