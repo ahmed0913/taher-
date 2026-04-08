@@ -103,20 +103,21 @@ export class DoctorsPage {
       </button>
     `).join('');
 
+    // DEBUG: Log image URLs
+    console.log('🩺 Img URLs:', this.doctors.map(d => d.image));
+
     // Render doctors
     this.filteredDoctors = this.doctors;
     grid.innerHTML = this.filteredDoctors.map(doctor => `
       <div class="card animate-slideUp" style="cursor: pointer;" onclick="app.navigate('book?doctor=${doctor.id}')">
-        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-          <div class="avatar avatar-lg" style="background: var(--gradient-primary);">
-            ${formatters.getInitials(doctor.name)}
-          </div>
-          <div>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+          <img src="${doctor.image}" alt="${doctor.name}" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; object-position: center;" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+          <div style="text-align: center;">
             <h3 style="margin: 0;">${doctor.name}</h3>
             <div class="badge badge-primary">${doctor.specialization}</div>
           </div>
         </div>
-        <p style="margin-bottom: 1rem; color: var(--text-secondary);">
+        <p style="margin-bottom: 1rem; color: var(--text-secondary); text-align: center;">
           Specialist in ${doctor.specialization}
         </p>
         <div class="card-footer" style="border-top: var(--glass-border); padding-top: 1rem;">
@@ -155,16 +156,14 @@ export class DoctorsPage {
     const grid = document.querySelector('#doctors-grid');
     grid.innerHTML = this.filteredDoctors.map(doctor => `
       <div class="card animate-slideUp" style="cursor: pointer;" onclick="app.navigate('book?doctor=${doctor.id}')">
-        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-          <div class="avatar avatar-lg" style="background: var(--gradient-primary);">
-            ${formatters.getInitials(doctor.name)}
-          </div>
-          <div>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+          <img src="${doctor.image}" alt="${doctor.name}" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; object-position: center;" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+          <div style="text-align: center;">
             <h3 style="margin: 0;">${doctor.name}</h3>
             <div class="badge badge-primary">${doctor.specialization}</div>
           </div>
         </div>
-        <p style="margin-bottom: 1rem; color: var(--text-secondary);">
+        <p style="margin-bottom: 1rem; color: var(--text-secondary); text-align: center;">
           Specialist in ${doctor.specialization}
         </p>
         <div class="card-footer" style="border-top: var(--glass-border); padding-top: 1rem;">
