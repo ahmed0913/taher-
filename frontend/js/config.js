@@ -27,10 +27,12 @@ export const config = {
     mockData: true
   },
 
-  // Demo Mode
+  // Demo Mode - ENABLED BY DEFAULT FOR INSTANT OPERATION
   demo: {
     enabled: true,
-    message: 'Running in demo mode with mock data'
+    instant: true,        // Skip API attempts and go straight to mock data
+    showBadge: true,      // Show "DEMO MODE" indicator in UI
+    message: '🎭 Demo Mode - Using Sample Data'
   },
 
   // Pagination

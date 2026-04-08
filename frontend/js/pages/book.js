@@ -1,5 +1,5 @@
 /** ═══════════════════════════════════════════════════════════════
- * 📅 Book Appointment Page - WITH LOADING BUG FIX
+ * 📅 Book Appointment Page - WITH LOADING BUG FIX & NULL SAFETY
  * ═══════════════════════════════════════════════════════════════ */
 
 import { appointmentsApi } from '../api/appointments.js';
@@ -9,6 +9,7 @@ import { toast } from '../ui/toast.js';
 import { validators } from '../utils/validators.js';
 import { storage } from '../utils/storage.js';
 import { createSkeletonList } from '../ui/loader.js';
+import { dom } from '../utils/dom.js';
 
 export class BookPage {
   constructor() {
@@ -17,15 +18,24 @@ export class BookPage {
     this.patients = [];
     this.currentStep = 1;
     this.formData = storage.getAppointmentDraft() || {};
+    this.container = null;
   }
 
   /**
-   * Render booking page with loading fix
+   * Render booking page with loading fix and null safety
    */
   async render(container) {
     console.log('📖 Rendering Book Appointment Page');
 
-    container.innerHTML = `
+    if (!container) {
+      console.error('❌ No container provided to BookPage');
+      return;
+    }
+
+    this.container = container;
+
+    // Build initial HTML
+    const html = `
       <main class="book-page">
         <section style="padding: 2rem 1rem;">
           <div class="container" style="max-width: 600px;">
@@ -49,7 +59,7 @@ export class BookPage {
               <p style="color: var(--text-secondary); margin-bottom: 2rem;">
                 Your appointment has been successfully scheduled.
               </p>
-              <button class="btn btn-primary" onclick="app.navigate('history')" style="cursor: pointer;">
+              <button class="btn btn-primary" id="view-appointments-btn" style="cursor: pointer;">
                 View My Appointments
               </button>
             </div>
@@ -66,7 +76,7 @@ export class BookPage {
               ">
                 <strong>Error:</strong> <span id="error-message"></span>
               </div>
-              <button class="btn btn-outline" onclick="location.reload()" style="cursor: pointer;">
+              <button class="btn btn-outline" id="try-again-btn" style="cursor: pointer;">
                 Try Again
               </button>
             </div>
@@ -75,26 +85,40 @@ export class BookPage {
       </main>
     `;
 
+    // Set HTML safely
+    dom.safeSetHTML(container, html);
+
     // Load data with timeout and fallback
-    await this.loadBookingData(container);
+    await this.loadBookingData();
 
     // Render form
-    this.renderForm(container);
+    this.renderForm();
+
+    // Setup event listeners
+    this.setupEventListeners();
   }
 
   /**
    * Load doctors and patients with timeout
    */
-  async loadBookingData(container) {
-    const loadingDiv = container.querySelector('#booking-loading');
-    loadingDiv.appendChild(createSkeletonList(3));
+  async loadBookingData() {
+    const loadingDiv = dom.safeQuery('#booking-loading', this.container);
+    if (!loadingDiv) {
+      console.error('❌ Loading div not found');
+      return;
+    }
+
+    const skeleton = createSkeletonList(3);
+    if (skeleton) {
+      loadingDiv.appendChild(skeleton);
+    }
 
     try {
       console.log('⏳ Loading doctors and patients...');
 
       // Use Promise.race to enforce timeout
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Loading timeout')), 5000)
+        setTimeout(() => reject(new Error('Loading timeout')), 3000)
       );
 
       const loadPromise = Promise.all([
@@ -105,39 +129,43 @@ export class BookPage {
       [this.doctors, this.patients] = await Promise.race([loadPromise, timeoutPromise]);
 
       console.log('✅ Data loaded:', { doctors: this.doctors.length, patients: this.patients.length });
-      loadingDiv.style.display = 'none';
+      dom.safeSetStyle(loadingDiv, 'display', 'none');
 
     } catch (error) {
       console.error('❌ Loading failed (timeout or error):', error);
-      toast.error('API not responding. Using demo data.', 5000);
 
       // Fallback to mock data
       this.doctors = await doctorsApi.getAll();
       this.patients = await patientsApi.getAll();
 
-      loadingDiv.style.display = 'none';
+      dom.safeSetStyle(loadingDiv, 'display', 'none');
     }
   }
 
   /**
    * Render form based on current step
    */
-  renderForm(container) {
-    const formDiv = container.querySelector('#booking-form');
+  renderForm() {
+    const formDiv = dom.safeQuery('#booking-form', this.container);
 
-    if (this.currentStep === 1) {
-      formDiv.innerHTML = this.renderPatientStep();
-    } else if (this.currentStep === 2) {
-      formDiv.innerHTML = this.renderDoctorStep();
-    } else if (this.currentStep === 3) {
-      formDiv.innerHTML = this.renderDateStep();
+    if (!formDiv) {
+      console.error('❌ Form div not found');
+      return;
     }
 
-    formDiv.style.display = 'block';
-    this.updateProgressBar();
+    let html = '';
 
-    // Attach event listeners
-    this.attachFormListeners(container);
+    if (this.currentStep === 1) {
+      html = this.renderPatientStep();
+    } else if (this.currentStep === 2) {
+      html = this.renderDoctorStep();
+    } else if (this.currentStep === 3) {
+      html = this.renderDateStep();
+    }
+
+    dom.safeSetHTML(formDiv, html);
+    dom.safeSetStyle(formDiv, 'display', 'block');
+    this.updateProgressBar();
   }
 
   /**
@@ -156,6 +184,7 @@ export class BookPage {
             border-radius: 0.5rem;
             padding: 0.75rem;
             cursor: pointer;
+            width: 100%;
           ">
             <option value="">-- Select or create patient --</option>
             ${this.patients.map(p => `<option value="${p.id}">${p.name} (${p.email})</option>`).join('')}
@@ -166,21 +195,21 @@ export class BookPage {
 
         <div class="form-group">
           <label>New Patient - Email</label>
-          <input type="email" id="patient-email" placeholder="your@email.com" />
+          <input type="email" id="patient-email" placeholder="your@email.com" style="width: 100%; padding: 0.75rem; background: var(--surface-secondary); border: 1px solid var(--border); border-radius: 0.5rem; box-sizing: border-box;" />
         </div>
 
         <div class="form-group">
           <label>Name</label>
-          <input type="text" id="patient-name" placeholder="Full Name" />
+          <input type="text" id="patient-name" placeholder="Full Name" style="width: 100%; padding: 0.75rem; background: var(--surface-secondary); border: 1px solid var(--border); border-radius: 0.5rem; box-sizing: border-box;" />
         </div>
 
         <div class="form-group">
           <label>Phone</label>
-          <input type="tel" id="patient-phone" placeholder="Phone number" />
+          <input type="tel" id="patient-phone" placeholder="Phone number" style="width: 100%; padding: 0.75rem; background: var(--surface-secondary); border: 1px solid var(--border); border-radius: 0.5rem; box-sizing: border-box;" />
         </div>
 
         <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-          <button class="btn btn-primary" onclick="document.querySelector('.book-page').dispatchEvent(new CustomEvent('next-step'))" style="flex: 1; cursor: pointer;">
+          <button class="btn btn-primary" id="next-step-1" style="flex: 1; cursor: pointer;">
             Next Step →
           </button>
         </div>
@@ -198,12 +227,13 @@ export class BookPage {
 
         <div id="doctors-list" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;">
           ${this.doctors.map(doctor => `
-            <div class="chip" onclick="document.getElementById('doctor-select').value = '${doctor.id}'; document.querySelector('.book-page').dispatchEvent(new CustomEvent('doctor-selected'))" style="
+            <div class="doctor-chip" data-doctor-id="${doctor.id}" style="
               padding: 1rem;
               cursor: pointer;
               border: 2px solid var(--border);
               transition: all 250ms;
               background: transparent;
+              border-radius: 0.5rem;
             ">
               <strong>${doctor.name}</strong>
               <div style="font-size: 0.875rem; color: var(--text-secondary);">
@@ -216,10 +246,10 @@ export class BookPage {
         <input type="hidden" id="doctor-select" />
 
         <div style="display: flex; gap: 1rem;">
-          <button class="btn btn-outline" onclick="document.querySelector('.book-page').dispatchEvent(new CustomEvent('prev-step'))" style="flex: 1; cursor: pointer;">
+          <button class="btn btn-outline" id="prev-step-2" style="flex: 1; cursor: pointer;">
             ← Back
           </button>
-          <button class="btn btn-primary" onclick="document.querySelector('.book-page').dispatchEvent(new CustomEvent('next-step'))" style="flex: 1; cursor: pointer;">
+          <button class="btn btn-primary" id="next-step-2" style="flex: 1; cursor: pointer;">
             Next Step →
           </button>
         </div>
@@ -243,6 +273,8 @@ export class BookPage {
             border-radius: 0.5rem;
             padding: 0.75rem;
             cursor: pointer;
+            width: 100%;
+            box-sizing: border-box;
           " />
         </div>
 
@@ -254,10 +286,10 @@ export class BookPage {
         "></div>
 
         <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-          <button class="btn btn-outline" onclick="document.querySelector('.book-page').dispatchEvent(new CustomEvent('prev-step'))" style="flex: 1; cursor: pointer;">
+          <button class="btn btn-outline" id="prev-step-3" style="flex: 1; cursor: pointer;">
             ← Back
           </button>
-          <button class="btn btn-primary" onclick="document.querySelector('.book-page').dispatchEvent(new CustomEvent('confirm-booking'))" style="flex: 1; cursor: pointer;">
+          <button class="btn btn-primary" id="confirm-booking-btn" style="flex: 1; cursor: pointer;">
             ✅ Confirm Booking
           </button>
         </div>
@@ -266,26 +298,91 @@ export class BookPage {
   }
 
   /**
-   * Attach form event listeners
+   * Setup all event listeners
    */
-  attachFormListeners(container) {
-    const page = container.querySelector('.book-page');
+  setupEventListeners() {
+    // Step 1 - Next button
+    const nextBtn1 = dom.safeQuery('#next-step-1', this.container);
+    if (nextBtn1) {
+      dom.safeAddListener(nextBtn1, 'click', () => this.handleNextStep());
+    }
 
-    page.addEventListener('next-step', () => this.handleNextStep(container));
-    page.addEventListener('prev-step', () => this.handlePrevStep(container));
-    page.addEventListener('confirm-booking', () => this.handleConfirmBooking(container));
-    page.addEventListener('doctor-selected', () => this.handleDoctorSelected());
+    // Step 2 - Doctor selection
+    const doctorChips = dom.safeQueryAll('.doctor-chip', this.container);
+    doctorChips.forEach(chip => {
+      dom.safeAddListener(chip, 'click', () => this.handleDoctorClick(chip));
+    });
+
+    const prevBtn2 = dom.safeQuery('#prev-step-2', this.container);
+    if (prevBtn2) {
+      dom.safeAddListener(prevBtn2, 'click', () => this.handlePrevStep());
+    }
+
+    const nextBtn2 = dom.safeQuery('#next-step-2', this.container);
+    if (nextBtn2) {
+      dom.safeAddListener(nextBtn2, 'click', () => this.handleNextStep());
+    }
+
+    // Step 3 - Date and confirm
+    const prevBtn3 = dom.safeQuery('#prev-step-3', this.container);
+    if (prevBtn3) {
+      dom.safeAddListener(prevBtn3, 'click', () => this.handlePrevStep());
+    }
+
+    const confirmBtn = dom.safeQuery('#confirm-booking-btn', this.container);
+    if (confirmBtn) {
+      dom.safeAddListener(confirmBtn, 'click', () => this.handleConfirmBooking());
+    }
+
+    // Success page button
+    const viewApptsBtn = dom.safeQuery('#view-appointments-btn', this.container);
+    if (viewApptsBtn) {
+      dom.safeAddListener(viewApptsBtn, 'click', () => {
+        if (window.app) window.app.navigate('history');
+      });
+    }
+
+    // Error page button
+    const tryAgainBtn = dom.safeQuery('#try-again-btn', this.container);
+    if (tryAgainBtn) {
+      dom.safeAddListener(tryAgainBtn, 'click', () => location.reload());
+    }
   }
 
   /**
-   * Handle next step
+   * Handle doctor selection
    */
-  handleNextStep(container) {
+  handleDoctorClick(chip) {
+    const doctorId = dom.safeGetAttr(chip, 'data-doctor-id');
+    if (!doctorId) return;
+
+    // Highlight selected doctor
+    const chips = dom.safeQueryAll('.doctor-chip', this.container);
+    chips.forEach(c => {
+      dom.safeSetStyle(c, 'borderColor', 'var(--border)');
+      dom.safeSetStyle(c, 'background', 'transparent');
+    });
+
+    // Highlight this one
+    dom.safeSetStyle(chip, 'borderColor', 'var(--primary)');
+    dom.safeSetStyle(chip, 'background', 'rgba(79, 172, 254, 0.1)');
+
+    // Store selection
+    const selectInput = dom.safeQuery('#doctor-select', this.container);
+    if (selectInput) {
+      dom.safeSetAttr(selectInput, 'value', doctorId);
+    }
+  }
+
+  /**
+   * Handle next step validation
+   */
+  handleNextStep() {
     if (this.currentStep === 1) {
-      const selectedId = document.getElementById('patient-select').value;
-      const email = document.getElementById('patient-email').value;
-      const name = document.getElementById('patient-name').value;
-      const phone = document.getElementById('patient-phone').value;
+      const selectedId = dom.safeQuery('#patient-select', this.container)?.value;
+      const email = dom.safeQuery('#patient-email', this.container)?.value;
+      const name = dom.safeQuery('#patient-name', this.container)?.value;
+      const phone = dom.safeQuery('#patient-phone', this.container)?.value;
 
       if (selectedId) {
         this.formData.patient_id = parseInt(selectedId);
@@ -305,7 +402,7 @@ export class BookPage {
 
       this.currentStep = 2;
     } else if (this.currentStep === 2) {
-      const doctorId = document.getElementById('doctor-select').value;
+      const doctorId = dom.safeQuery('#doctor-select', this.container)?.value;
       if (!doctorId) {
         toast.error('Please select a doctor');
         return;
@@ -315,29 +412,33 @@ export class BookPage {
     }
 
     storage.saveAppointmentDraft(this.formData);
-    this.renderForm(container);
+    this.renderForm();
+    this.setupEventListeners();
   }
 
   /**
    * Handle previous step
    */
-  handlePrevStep(container) {
+  handlePrevStep() {
     if (this.currentStep > 1) {
       this.currentStep--;
     }
-    this.renderForm(container);
+    this.renderForm();
+    this.setupEventListeners();
   }
 
   /**
    * Handle confirm booking
    */
-  async handleConfirmBooking(container) {
-    const appointmentDate = document.getElementById('appointment-date').value;
-    const dateError = document.getElementById('date-error');
+  async handleConfirmBooking() {
+    const appointmentDate = dom.safeQuery('#appointment-date', this.container)?.value;
+    const dateError = dom.safeQuery('#date-error', this.container);
 
     if (!appointmentDate) {
-      dateError.textContent = 'Please select a date';
-      dateError.style.display = 'block';
+      if (dateError) {
+        dom.safeSetText(dateError, 'Please select a date');
+        dom.safeSetStyle(dateError, 'display', 'block');
+      }
       return;
     }
 
@@ -354,7 +455,8 @@ export class BookPage {
 
     try {
       console.log('📡 Creating appointment...');
-      container.querySelector('#booking-form').style.display = 'none';
+      const formDiv = dom.safeQuery('#booking-form', this.container);
+      if (formDiv) dom.safeSetStyle(formDiv, 'display', 'none');
 
       const result = await appointmentsApi.create({
         patient_id: this.formData.patient_id,
@@ -365,26 +467,21 @@ export class BookPage {
       console.log('✅ Appointment created:', result);
 
       storage.clearAppointmentDraft();
-      container.querySelector('#booking-success').style.display = 'block';
+      const successDiv = dom.safeQuery('#booking-success', this.container);
+      if (successDiv) dom.safeSetStyle(successDiv, 'display', 'block');
       toast.success('Appointment booked successfully!');
 
     } catch (error) {
       console.error('❌ Booking failed:', error);
-      container.querySelector('#booking-error').style.display = 'block';
-      document.getElementById('error-message').textContent = error.message || 'Failed to create appointment';
+      const errorDiv = dom.safeQuery('#booking-error', this.container);
+      if (errorDiv) dom.safeSetStyle(errorDiv, 'display', 'block');
+
+      const errorMsg = dom.safeQuery('#error-message', this.container);
+      if (errorMsg) {
+        dom.safeSetText(errorMsg, error.message || 'Failed to create appointment');
+      }
       toast.error('Failed to book appointment');
     }
-  }
-
-  /**
-   * Handle doctor selected
-   */
-  handleDoctorSelected() {
-    // Highlight selected doctor
-    document.querySelectorAll('#doctors-list .chip').forEach(chip => {
-      chip.style.borderColor = 'var(--border)';
-      chip.style.background = 'transparent';
-    });
   }
 
   /**
@@ -392,9 +489,9 @@ export class BookPage {
    */
   updateProgressBar() {
     const progress = (this.currentStep / 3) * 100;
-    const progressBar = document.getElementById('progress-bar');
+    const progressBar = dom.safeQuery('#progress-bar', this.container);
     if (progressBar) {
-      progressBar.style.width = progress + '%';
+      dom.safeSetStyle(progressBar, 'width', progress + '%');
     }
   }
 }

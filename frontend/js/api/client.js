@@ -1,30 +1,49 @@
 /** ═══════════════════════════════════════════════════════════════
  * 🌐 API Client - Fetch Wrapper with Error Handling & Retry Logic
+ * ENHANCED: Instant demo mode, fast fallback, zero delays
  * ═══════════════════════════════════════════════════════════════ */
 
 import { getMockData } from '../data/mockData.js';
+import { config } from '../config.js';
 
 class ApiClient {
-  constructor(baseURL = 'http://localhost:8080/api') {
+  constructor(baseURL = config.api.baseURL) {
     this.baseURL = baseURL;
-    this.maxRetries = 3;
-    this.retryDelay = 1000; // Start with 1s, increase exponentially
-    this.timeout = 5000; // 5 second timeout
-    this.useMockData = false;
-    this.mockDataCache = null;
+    this.maxRetries = config.demo.instant ? 0 : 1;  // Skip retries if instant demo mode
+    this.retryDelay = 300;  // Reduced from 1000ms
+    this.timeout = config.demo.instant ? 0 : 2000;  // 2 second timeout, 0 if demo mode
+    this.useMockData = config.demo.instant;  // INSTANT demo mode
+    this.mockDataCache = config.demo.instant ? getMockData() : null;
+    this.demoMode = config.demo.instant;
 
-    console.log('✅ API Client initialized:', { baseURL, maxRetries: this.maxRetries, timeout: this.timeout });
+    const mode = this.demoMode ? '🎭 DEMO MODE (Instant)' : '🌐 API MODE';
+    console.log(`✅ API Client initialized [${mode}]`, { 
+      baseURL: this.baseURL,
+      instant: config.demo.instant,
+      timeout: this.timeout,
+      retries: this.maxRetries
+    });
   }
 
   /**
    * Make API request with timeout, retry logic, and fallback to mock data
    */
   async request(endpoint, options = {}, retryCount = 0) {
+    // If in instant demo mode, skip API entirely
+    if (this.demoMode && retryCount === 0) {
+      console.log(`🎭 DEMO: Skipping API for ${endpoint}, using mock data`);
+      return this.getMockDataForEndpoint(endpoint);
+    }
+
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => {
-      console.warn(`⏱️ Request timeout (${this.timeout}ms) for ${endpoint}`);
-      controller.abort();
-    }, this.timeout);
+    let timeoutId;
+
+    if (this.timeout > 0) {
+      timeoutId = setTimeout(() => {
+        console.warn(`⏱️ Request timeout (${this.timeout}ms) for ${endpoint}`);
+        controller.abort();
+      }, this.timeout);
+    }
 
     try {
       const url = `${this.baseURL}${endpoint}`;
@@ -40,7 +59,7 @@ class ApiClient {
         }
       });
 
-      clearTimeout(timeoutId);
+      if (timeoutId) clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -50,10 +69,11 @@ class ApiClient {
 
       const data = await response.json();
       console.log(`✅ API Success: ${endpoint}`, data);
+      this.demoMode = false;  // API is working, disable demo mode
       return data;
 
     } catch (error) {
-      clearTimeout(timeoutId);
+      if (timeoutId) clearTimeout(timeoutId);
       console.error(`❌ API Error (attempt ${retryCount + 1}):`, error.message);
 
       // Retry with exponential backoff
@@ -64,10 +84,23 @@ class ApiClient {
         return this.request(endpoint, options, retryCount + 1);
       }
 
-      // All retries failed - fallback to mock data
-      console.warn(`🔄 All retries failed (${this.maxRetries + 1} attempts). Falling back to mock data.`);
-      throw error;
+      // All retries failed - switch to demo mode
+      console.warn(`🎭 Switching to DEMO MODE - Using mock data for ${endpoint}`);
+      this.demoMode = true;
+      this.mockDataCache = this.mockDataCache || getMockData();
+      return this.getMockDataForEndpoint(endpoint);
     }
+  }
+
+  /**
+   * Get appropriate mock data for endpoint
+   */
+  getMockDataForEndpoint(endpoint) {
+    const cache = this.mockDataCache || getMockData();
+    if (endpoint.includes('doctors')) return cache.doctors || [];
+    if (endpoint.includes('patients')) return cache.patients || [];
+    if (endpoint.includes('appointments')) return cache.appointments || [];
+    return [];
   }
 
   /**

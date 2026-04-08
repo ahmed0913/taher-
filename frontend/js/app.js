@@ -6,6 +6,8 @@ import { theme } from './ui/theme.js';
 import { particles } from './ui/particles.js';
 import { api } from './api/client.js';
 import { toast } from './ui/toast.js';
+import { demoModeBadge } from './ui/demoBadge.js';
+import { config } from './config.js';
 
 // Import pages
 import HomePage from './pages/home.js';
@@ -43,6 +45,12 @@ class ClinicApp {
       // Initialize particles
       particles.init();
       console.log('✅ Particles initialized');
+
+      // Show demo mode badge if enabled
+      if (config.demo.enabled && config.demo.showBadge) {
+        demoModeBadge.init();
+        console.log('🎭 Demo mode badge shown');
+      }
 
       // Setup navbar
       this.setupNavbar();
@@ -115,7 +123,8 @@ class ClinicApp {
   }
 
   /**
-   * Get page from URL
+   * Get page from URL with query parameter support
+   * Supports: #home, #book?doctor=1, #doctors?spec=Cardiology, etc.
    */
   getPageFromURL() {
     const hash = window.location.hash.slice(1) || 'home';
@@ -124,13 +133,41 @@ class ClinicApp {
   }
 
   /**
-   * Navigate to page
+   * Get query parameters from URL
+   * Returns object with query params: { doctor: '1', spec: 'Cardiology' }
    */
-  async navigate(page) {
-    console.log('📍 Navigating to:', page);
+  getQueryParams() {
+    const hash = window.location.hash.slice(1) || '';
+    const [, queryString] = hash.split('?');
+    
+    if (!queryString) return {};
+    
+    const params = new URLSearchParams(queryString);
+    const result = {};
+    
+    for (const [key, value] of params.entries()) {
+      result[key] = value;
+    }
+    
+    return result;
+  }
+
+  /**
+   * Navigate to page with optional query parameters
+   * Usage: navigate('book', { doctor: 1 })
+   */
+  async navigate(page, queryParams = {}) {
+    console.log('📍 Navigating to:', page, queryParams);
+
+    // Build URL with query parameters
+    let url = page;
+    if (Object.keys(queryParams).length > 0) {
+      const params = new URLSearchParams(queryParams).toString();
+      url = `${page}?${params}`;
+    }
 
     // Update URL
-    window.location.hash = page;
+    window.location.hash = url;
 
     // Render page
     await this.renderPage(page);
