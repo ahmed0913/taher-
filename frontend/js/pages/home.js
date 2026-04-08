@@ -1,9 +1,10 @@
 /** ═══════════════════════════════════════════════════════════════
- * 🏠 Home Page
+ * 🏠 Home Page - Enhanced with Animations & Store Integration
  * ═══════════════════════════════════════════════════════════════ */
 
-import { toast } from '../ui/toast.js';
 import { api } from '../api/client.js';
+import notifications from '../ui/notifications.js';
+import store from '../store.js';
 
 export class HomePage {
   constructor() {
@@ -19,37 +20,24 @@ export class HomePage {
     container.innerHTML = `
       <main class="home-page">
         <!-- Hero Section -->
-        <section class="hero" style="
-          background: linear-gradient(135deg, var(--bg-dark) 0%, rgba(118, 75, 162, 0.1) 100%);
-          padding: 4rem 1rem;
-          position: relative;
-          overflow: hidden;
-        ">
+        <section class="hero-section">
+          <div class="hero-background"></div>
           <div class="container">
-            <div class="stagger-children">
-              <h1 style="
-                font-size: clamp(2rem, 8vw, 4rem);
-                background: var(--gradient-primary);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
-                margin-bottom: 1rem;
-              ">
-                Welcome to Clinic Care
+            <div class="hero-content">
+              <h1 class="hero-title">
+                Welcome to <span class="gradient-text">Clinic Care</span>
               </h1>
-              <p style="
-                font-size: clamp(1rem, 4vw, 1.5rem);
-                color: var(--text-secondary);
-                margin-bottom: 2rem;
-                max-width: 600px;
-              ">
-                Book appointments with our specialists and manage your healthcare with ease
+              <p class="hero-subtitle">
+                Your trusted healthcare partner for quality medical services
               </p>
-              <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <button class="btn btn-primary btn-lg" onclick="app.navigate('doctors')" style="cursor: pointer;">
+              <p class="hero-description">
+                Book appointments with our specialists, manage your health records, and receive personalized care
+              </p>
+              <div class="hero-actions">
+                <button class="btn btn-primary btn-lg" data-action="doctors">
                   👨‍⚕️ View Doctors
                 </button>
-                <button class="btn btn-outline btn-lg" onclick="app.navigate('book')" style="cursor: pointer;">
+                <button class="btn btn-outline btn-lg" data-action="book">
                   📅 Book Appointment
                 </button>
               </div>
@@ -58,66 +46,119 @@ export class HomePage {
         </section>
 
         <!-- Features Section -->
-        <section style="padding: 4rem 1rem; background: var(--surface);">
+        <section class="features-section">
           <div class="container">
-            <h2 style="text-align: center; margin-bottom: 3rem;">Why Choose Us?</h2>
-            <div class="grid grid-cols-3" style="gap: 2rem;">
-              ${this.createFeatureCard('⚡', 'Fast Appointments', 'Book appointments instantly with our specialist doctors')}
-              ${this.createFeatureCard('🔒', 'Secure & Private', 'Your medical data is encrypted and protected')}
-              ${this.createFeatureCard('📱', 'Easy to Use', 'Simple interface works on all devices')}
+            <h2 class="section-title">Why Choose Our Clinic?</h2>
+            <div class="features-grid">
+              ${this.createFeatureCard('⚡', 'Instant Booking', 'Schedule appointments instantly with real-time availability')}
+              ${this.createFeatureCard('🔒', 'Secure & Private', 'Your medical data is encrypted and HIPAA compliant')}
+              ${this.createFeatureCard('👨‍⚕️', 'Expert Doctors', 'Board-certified specialists with years of experience')}
+              ${this.createFeatureCard('📱', 'Mobile Friendly', 'Access your health on any device, anytime, anywhere')}
+              ${this.createFeatureCard('💬', '24/7 Support', 'Our support team is always ready to help')}
+              ${this.createFeatureCard('🏆', 'Award Winning', 'Recognized for excellence in patient care')}
             </div>
           </div>
         </section>
 
         <!-- Stats Section -->
-        <section style="padding: 4rem 1rem;">
+        <section class="stats-section">
           <div class="container">
-            <div class="grid grid-cols-3" style="gap: 2rem; text-align: center;">
-              <div class="card">
-                <div style="font-size: 2.5rem; font-weight: bold; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                  <span class="stat-counter" data-target="5">0</span>+
+            <h2 class="section-title">By The Numbers</h2>
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-number gradient-primary">
+                  <span class="stat-counter" data-target="25">0</span>+
                 </div>
-                <div style="color: var(--text-secondary); margin-top: 0.5rem;">Specialist Doctors</div>
+                <div class="stat-label">Specialist Doctors</div>
+                <p class="stat-description">Qualified medical professionals</p>
               </div>
-              <div class="card">
-                <div style="font-size: 2.5rem; font-weight: bold; background: var(--gradient-secondary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                  <span class="stat-counter" data-target="500">0</span>+
+              <div class="stat-card">
+                <div class="stat-number gradient-secondary">
+                  <span class="stat-counter" data-target="5000">0</span>+
                 </div>
-                <div style="color: var(--text-secondary); margin-top: 0.5rem;">Patients Served</div>
+                <div class="stat-label">Patients Served</div>
+                <p class="stat-description">Trust and satisfaction guaranteed</p>
               </div>
-              <div class="card">
-                <div style="font-size: 2.5rem; font-weight: bold; background: var(--gradient-accent); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+              <div class="stat-card">
+                <div class="stat-number gradient-accent">
                   <span class="stat-counter" data-target="98">0</span>%
                 </div>
-                <div style="color: var(--text-secondary); margin-top: 0.5rem;">Satisfaction Rate</div>
+                <div class="stat-label">Satisfaction Rate</div>
+                <p class="stat-description">Highly rated by patients</p>
+              </div>
+              <div class="stat-card">
+                <div class="stat-number gradient-cyan">
+                  <span class="stat-counter" data-target="10">0</span>k
+                </div>
+                <div class="stat-label">Appointments/Month</div>
+                <p class="stat-description">Growing trust every day</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Services Section -->
+        <section class="services-section">
+          <div class="container">
+            <h2 class="section-title">Our Services</h2>
+            <div class="services-grid">
+              <div class="service-card">
+                <div class="service-icon">🩺</div>
+                <h3>General Medicine</h3>
+                <p>Comprehensive health checkups and treatment for common illnesses</p>
+              </div>
+              <div class="service-card">
+                <div class="service-icon">❤️</div>
+                <h3>Cardiology</h3>
+                <p>Heart and cardiovascular system care from specialists</p>
+              </div>
+              <div class="service-card">
+                <div class="service-icon">🦷</div>
+                <h3>Dentistry</h3>
+                <p>Dental care and cosmetic procedures for your smile</p>
+              </div>
+              <div class="service-card">
+                <div class="service-icon">🧠</div>
+                <h3>Neurology</h3>
+                <p>Brain and nervous system disorder treatment</p>
+              </div>
+              <div class="service-card">
+                <div class="service-icon">👀</div>
+                <h3>Ophthalmology</h3>
+                <p>Complete eye care and vision correction services</p>
+              </div>
+              <div class="service-card">
+                <div class="service-icon">🦴</div>
+                <h3>Orthopedics</h3>
+                <p>Bone, joint, and musculoskeletal system care</p>
               </div>
             </div>
           </div>
         </section>
 
         <!-- CTA Section -->
-        <section style="
-          padding: 4rem 1rem;
-          background: linear-gradient(135deg, rgba(0, 242, 254, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-        ">
-          <div class="container" style="text-align: center;">
-            <h2 style="margin-bottom: 2rem;">Ready to Book Your Appointment?</h2>
-            <button class="btn btn-primary btn-lg" onclick="app.navigate('book')" style="cursor: pointer;">
-              Get Started Now →
-            </button>
+        <section class="cta-section">
+          <div class="container">
+            <div class="cta-content">
+              <h2>Ready to Get Started?</h2>
+              <p>Join thousands of satisfied patients who trust us with their health</p>
+              <button class="btn btn-primary btn-lg" data-action="book">
+                Schedule Your Appointment Today →
+              </button>
+            </div>
           </div>
         </section>
       </main>
     `;
 
-    // Animate stats counters
+    this._attachEventListeners();
     this.animateCounters();
 
     // Check API health
     const isHealthy = await api.healthCheck();
     if (!isHealthy) {
       api.enableDemoMode();
-      toast.warning('API endpoint not available. Using demo mode.', 5000);
+      notifications.warning('Using demo mode - API unavailable', 5000);
     }
   }
 
@@ -126,35 +167,68 @@ export class HomePage {
    */
   createFeatureCard(icon, title, description) {
     return `
-      <div class="card animate-slideUp">
-        <div style="font-size: 2.5rem; margin-bottom: 1rem;">${icon}</div>
-        <h3 style="margin-bottom: 0.5rem;">${title}</h3>
-        <p style="color: var(--text-secondary);">${description}</p>
+      <div class="feature-card">
+        <div class="feature-icon">${icon}</div>
+        <h3>${title}</h3>
+        <p>${description}</p>
       </div>
     `;
   }
 
   /**
-   * Animate number counters
+   * Animate number counters on scroll
    */
   animateCounters() {
     const counters = document.querySelectorAll('.stat-counter');
-    counters.forEach(counter => {
-      const target = parseInt(counter.getAttribute('data-target'));
-      let current = 0;
-      const increment = target / 30;
 
-      const animate = () => {
-        current += increment;
-        if (current < target) {
-          counter.textContent = Math.floor(current);
-          setTimeout(animate, 50);
-        } else {
-          counter.textContent = target;
+    if (!counters.length) return;
+
+    // Intersection Observer to detect when counters are in view
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && !entry.target.animated) {
+          entry.target.animated = true;
+          this._startCounterAnimation(entry.target);
         }
-      };
+      });
+    }, { threshold: 0.5 });
 
-      animate();
+    counters.forEach((counter) => observer.observe(counter));
+  }
+
+  /**
+   * Start animation for a single counter
+   */
+  _startCounterAnimation(counter) {
+    const target = parseInt(counter.getAttribute('data-target'));
+    let current = 0;
+    const increment = target / 40; // 40 frames
+    const duration = 1000; // 1 second
+    const frameDuration = duration / 40;
+
+    const animate = () => {
+      current += increment;
+      if (current < target) {
+        counter.textContent = Math.floor(current);
+        setTimeout(animate, frameDuration);
+      } else {
+        counter.textContent = target;
+      }
+    };
+
+    animate();
+  }
+
+  /**
+   * Attach event listeners
+   */
+  _attachEventListeners() {
+    const buttons = document.querySelectorAll('[data-action]');
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const action = btn.dataset.action;
+        app.navigate(action);
+      });
     });
   }
 }
