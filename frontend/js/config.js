@@ -1,15 +1,30 @@
 /** ═══════════════════════════════════════════════════════════════
  * ⚙️ Configuration - API & App Constants
+ * Vanilla JS Compatible (No Node.js process object)
  * ═══════════════════════════════════════════════════════════════ */
+
+// 🎯 Environment detection for browser
+const getEnvVar = (key, fallback) => {
+  // Try window object first (can be set via inline script)
+  if (window[key] !== undefined) return window[key];
+  
+  // Try data attributes on HTML element
+  const html = document.documentElement;
+  const attr = html.getAttribute(`data-${key.toLowerCase()}`);
+  if (attr) return attr;
+  
+  // Fallback to default
+  return fallback;
+};
 
 export const config = {
   // API Configuration
   api: {
-    // Try to get from environment, fallback to localhost
-    baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8080/api',
-    timeout: 5000, // 5 seconds
-    maxRetries: 3,
-    retryDelay: 1000
+    // ✅ Browser-compatible environment variable handling
+    baseURL: getEnvVar('API_URL', 'http://localhost:8080/api'),
+    timeout: 3000,          // ⬅️ قلل لـ 3 ثواني
+    maxRetries: 1,          // ⬅️ محاولة واحدة بس (عشان السرعة)
+    retryDelay: 500
   },
 
   // App Configuration
@@ -29,9 +44,9 @@ export const config = {
 
   // Demo Mode - ENABLED BY DEFAULT FOR INSTANT OPERATION
   demo: {
-    enabled: true,
-    instant: true,        // Skip API attempts and go straight to mock data
-    showBadge: true,      // Show "DEMO MODE" indicator in UI
+    enabled: true,          // ✅ شغال من الأول
+    instant: true,          // ✅ تخطي محاولات الـ API
+    showBadge: true,
     message: '🎭 Demo Mode - Using Sample Data'
   },
 
@@ -39,7 +54,19 @@ export const config = {
   pagination: {
     itemsPerPage: 10,
     maxPages: 100
-  }
+  },
+  
+  // Environment flags (browser-safe)
+  isDevelopment: window.location.hostname === 'localhost',
+  isProduction: window.location.hostname !== 'localhost'
 };
+
+// Log in dev mode only
+if (config.isDevelopment) {
+  console.log('⚙️ Config loaded:', { 
+    baseURL: config.api.baseURL, 
+    demo: config.demo.enabled 
+  });
+}
 
 export default config;
