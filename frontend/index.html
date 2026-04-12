@@ -20,6 +20,12 @@
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/responsive.css" />
   <link rel="stylesheet" href="css/utilities.css" />
+  <link rel="stylesheet" href="css/custom-select.css" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Page-specific Styles -->
   <style>
@@ -118,7 +124,33 @@
 
     #theme-toggle:hover {
       background: var(--surface-secondary);
-      transform: spin 1s linear;
+      animation: spin 0.5s linear;
+    }
+
+    /* Global input text color fix for dark mode */
+    input, select, textarea {
+      color: var(--text);
+      font-family: 'Inter', var(--font-family-sans);
+    }
+
+    /* Footer styling */
+    .site-footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      border-top: var(--glass-border);
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .site-footer a {
+      color: var(--neon-blue);
+      text-decoration: none;
+    }
+
+    .site-footer a:hover {
+      text-decoration: underline;
     }
 
     /* Main app container */
@@ -165,6 +197,12 @@
 
   <!-- Main App Container -->
   <div id="app" role="main"></div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <p>© 2025 Clinic Care — Built by <strong>Mohamed Taher, Karim Zaky, Ganna Amr, Mariam Darwish, Hanin Mahmoud</strong></p>
+    <p style="margin-top: 0.5rem;">Vanilla JavaScript ES6+ | HTML5 | CSS3 | Glassmorphism UI</p>
+  </footer>
 
   <!-- JavaScript Modules -->
   <script type="module" src="js/app.js"></script>

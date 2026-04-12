@@ -10,7 +10,7 @@ export const mockDoctors = [
     image: 'images/doctor-1.jpg',
     rating: 4.9,
     reviews: 187,
-    nextAvailable: '2025-08-01',
+    nextAvailable: '2026-08-01',
     price: 500,
     bio: 'Expert cardiologist with 15+ years of experience',
     availability: ['09:00', '10:30', '14:00', '15:30']
@@ -22,7 +22,7 @@ export const mockDoctors = [
     image: 'images/doctor-2.jpg',
     rating: 4.8,
     reviews: 142,
-    nextAvailable: '2025-08-02',
+    nextAvailable: '2026-08-02',
     price: 450,
     bio: 'Specialized in skin care and treatments',
     availability: ['10:00', '11:30', '13:00', '16:00']
@@ -34,7 +34,7 @@ export const mockDoctors = [
     image: 'images/doctor-3.jpg',
     rating: 4.7,
     reviews: 156,
-    nextAvailable: '2025-08-03',
+    nextAvailable: '2026-08-03',
     price: 480,
     bio: 'Specialist in bone and joint health',
     availability: ['08:30', '10:00', '15:00', '16:30']
@@ -46,7 +46,7 @@ export const mockDoctors = [
     image: 'images/doctor-4.jpg',
     rating: 4.85,
     reviews: 201,
-    nextAvailable: '2025-08-04',
+    nextAvailable: '2026-08-04',
     price: 400,
     bio: 'Dedicated to children\'s health and development',
     availability: ['09:00', '10:30', '13:00', '14:30']
@@ -58,7 +58,7 @@ export const mockDoctors = [
     image: 'images/doctor-5.jpg',
     rating: 4.92,
     reviews: 218,
-    nextAvailable: '2025-08-05',
+    nextAvailable: '2026-08-05',
     price: 550,
     bio: 'Expert in neurological disorders and treatment',
     availability: ['08:00', '09:30', '14:00', '16:00']
@@ -119,11 +119,11 @@ export const mockPatients = [
 ];
 
 export const mockAppointments = [
-  { id: 1, patient_id: 1, doctor_id: 1, date: '2025-08-01' },
-  { id: 2, patient_id: 2, doctor_id: 2, date: '2025-08-02' },
-  { id: 3, patient_id: 3, doctor_id: 1, date: '2025-08-03' },
-  { id: 4, patient_id: 4, doctor_id: 3, date: '2025-08-04' },
-  { id: 5, patient_id: 5, doctor_id: 4, date: '2025-08-05' }
+  { id: 1, patient_id: 1, doctor_id: 1, date: '2026-08-01' },
+  { id: 2, patient_id: 2, doctor_id: 2, date: '2026-08-02' },
+  { id: 3, patient_id: 3, doctor_id: 1, date: '2026-08-03' },
+  { id: 4, patient_id: 4, doctor_id: 3, date: '2026-08-04' },
+  { id: 5, patient_id: 5, doctor_id: 4, date: '2026-08-05' }
 ];
 
 export const mockData = {

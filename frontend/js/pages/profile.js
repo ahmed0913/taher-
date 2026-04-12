@@ -21,6 +21,9 @@ export class ProfilePage {
   async render(container) {
     console.log('📖 Rendering Profile Page');
 
+    // Re-read patient data each time the page renders
+    this.patient = storage.getPatient() || null;
+
     if (!this.patient) {
       container.innerHTML = `
         <main style="padding: 2rem 1rem;">

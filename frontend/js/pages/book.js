@@ -277,7 +277,7 @@ export class BookPage {
 
         <div class="form-group">
           <label>Appointment Date</label>
-          <input type="date" id="appointment-date" value="${selectedDate || ''}" style="
+          <input type="date" id="appointment-date" value="${selectedDate || ''}" min="${new Date().toISOString().split('T')[0]}" style="
             background: var(--surface-secondary);
             border: 1px solid var(--border);
             border-radius: 0.5rem;
@@ -285,6 +285,7 @@ export class BookPage {
             cursor: pointer;
             width: 100%;
             box-sizing: border-box;
+            color: var(--text);
           " />
         </div>
 
@@ -599,6 +600,17 @@ export class BookPage {
       console.log('✅ Appointment confirmed:', appointment);
 
       storage.clearAppointmentDraft();
+
+      // Save patient data for Profile page
+      if (this.formData.isNewPatient && typeof this.formData.patient === 'object') {
+        storage.savePatient(this.formData.patient);
+      } else if (!this.formData.isNewPatient) {
+        const patientObj = this.patients.find(p => p.id === this.formData.patient);
+        if (patientObj) {
+          storage.savePatient(patientObj);
+        }
+      }
+
       const successDiv = dom.safeQuery('#booking-success', this.container);
       if (successDiv) {
         dom.safeSetHTML(successDiv, `

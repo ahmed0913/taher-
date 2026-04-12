@@ -224,15 +224,16 @@ class Store {
    * @param {number} duration - Auto-hide duration in ms
    */
   notify(message, type = 'info', duration = 3000) {
+    const notificationId = Date.now();
     this.setState('notification', {
       message,
       type,
-      id: Date.now(),
+      id: notificationId,
     });
 
     if (duration) {
       setTimeout(() => {
-        if (this.state.notification?.id === Date.now()) {
+        if (this.state.notification?.id === notificationId) {
           this.setState('notification', null);
         }
       }, duration);

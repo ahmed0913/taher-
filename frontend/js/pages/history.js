@@ -104,6 +104,9 @@ export class HistoryPage {
 
       [this.appointments, this.doctors, this.patients] = await Promise.race([loadPromise, timeoutPromise]);
 
+      // Merge with locally booked appointments
+      this._mergeLocalAppointments();
+
       console.log('✅ Appointments loaded:', this.appointments.length);
       loadingDiv.style.display = 'none';
       this.renderAppointments(container);
@@ -117,6 +120,9 @@ export class HistoryPage {
       this.doctors = await doctorsApi.getAll();
       this.patients = await patientsApi.getAll();
 
+      // Merge with locally booked appointments
+      this._mergeLocalAppointments();
+
       loadingDiv.style.display = 'none';
 
       if (this.appointments.length > 0) {
@@ -124,6 +130,37 @@ export class HistoryPage {
       } else {
         container.querySelector('#empty-state').style.display = 'block';
       }
+    }
+  }
+
+  /**
+   * Merge locally booked appointments from localStorage
+   */
+  _mergeLocalAppointments() {
+    try {
+      const localAppts = JSON.parse(localStorage.getItem('appointments') || '[]');
+      if (localAppts.length > 0) {
+        console.log('📦 Found', localAppts.length, 'local appointments');
+        localAppts.forEach(appt => {
+          // Convert local appointment format to match mock data format
+          const converted = {
+            id: appt.id || `local-${Date.now()}`,
+            patient_id: typeof appt.patient === 'object' ? null : appt.patient,
+            doctor_id: appt.doctor?.id || null,
+            date: appt.date,
+            time: appt.time,
+            status: appt.status || 'confirmed'
+          };
+          this.appointments.push(converted);
+
+          // Add doctor to doctors list if not already there
+          if (appt.doctor && !this.doctors.find(d => d.id === appt.doctor.id)) {
+            this.doctors.push(appt.doctor);
+          }
+        });
+      }
+    } catch (e) {
+      console.warn('⚠️ Failed to load local appointments:', e);
     }
   }
 

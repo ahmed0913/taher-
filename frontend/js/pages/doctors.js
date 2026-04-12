@@ -98,10 +98,22 @@ export class DoctorsPage {
 
     // Update filter buttons
     filterControls.innerHTML = specs.map(spec => `
-      <button class="chip ${spec === 'All' ? 'active' : ''}" onclick="this.classList.toggle('active'); document.querySelector('.doctors-page').dispatchEvent(new CustomEvent('filter', {detail: {spec: '${spec}'}}))">
+      <button class="chip ${spec === this.selectedSpecialization ? 'active' : ''}" data-spec="${spec}">
         ${spec}
       </button>
     `).join('');
+
+    // Attach filter click handlers
+    filterControls.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const spec = chip.getAttribute('data-spec');
+        this.selectedSpecialization = spec;
+        // Update active state
+        filterControls.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        this.filterDoctors(spec);
+      });
+    });
 
     // DEBUG: Log image URLs
     console.log('🩺 Img URLs:', this.doctors.map(d => d.image));
@@ -109,7 +121,7 @@ export class DoctorsPage {
     // Render doctors
     this.filteredDoctors = this.doctors;
     grid.innerHTML = this.filteredDoctors.map(doctor => `
-      <div class="card animate-slideUp" style="cursor: pointer;" onclick="app.navigate('book?doctor=${doctor.id}')">
+      <div class="card animate-slideUp" style="cursor: pointer;" onclick="window.app.navigate('book', { doctor: '${doctor.id}' })">
         <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-bottom: 1rem;">
           <img src="${doctor.image}" alt="${doctor.name}" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; object-position: center;" loading="lazy" decoding="async" onerror="this.style.display='none'" />
           <div style="text-align: center;">
@@ -155,7 +167,7 @@ export class DoctorsPage {
 
     const grid = document.querySelector('#doctors-grid');
     grid.innerHTML = this.filteredDoctors.map(doctor => `
-      <div class="card animate-slideUp" style="cursor: pointer;" onclick="app.navigate('book?doctor=${doctor.id}')">
+      <div class="card animate-slideUp" style="cursor: pointer;" onclick="window.app.navigate('book', { doctor: '${doctor.id}' })">
         <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-bottom: 1rem;">
           <img src="${doctor.image}" alt="${doctor.name}" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; object-position: center;" loading="lazy" decoding="async" onerror="this.style.display='none'" />
           <div style="text-align: center;">
